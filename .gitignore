@@ -9,8 +9,6 @@ reelshort-web/node_modules/
 
 # production builds
 /build
-dist/
-reelshort-web/dist/
 
 # credentials & secrets
 google-indexing-key.json

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from flask_restx import Api, Resource, fields, reqparse
 import os
@@ -14,18 +14,35 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/')
-def home_index():
+DIST_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'reelshort-web', 'dist'))
+
+@app.route('/api/health')
+def health_check():
+    return jsonify({'status': 'ok', 'service': 'reelshort-api'})
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve_spa(path):
+    # Rotas internas da API e Swagger não devem servir o SPA
+    if path.startswith('api/') or path.startswith('docs') or path.startswith('swaggerui'):
+        return jsonify({'error': 'Endpoint not found'}), 404
+
+    # Arquivo estático (assets, icons, css, js)
+    target_file = os.path.join(DIST_DIR, path)
+    if path and os.path.exists(target_file) and os.path.isfile(target_file):
+        return send_from_directory(DIST_DIR, path)
+
+    # Fallback para SPA React Router (todas as URLs de páginas)
+    index_file = os.path.join(DIST_DIR, 'index.html')
+    if os.path.exists(index_file):
+        return send_from_directory(DIST_DIR, 'index.html')
+
     return jsonify({
         'status': 'online',
         'service': 'Doramas Dublados API',
         'health': '/api/health',
         'docs': '/docs'
     })
-
-@app.route('/api/health')
-def health_check():
-    return jsonify({'status': 'ok', 'service': 'reelshort-api'})
 
 # Konfigurasi Swagger API
 api = Api(
