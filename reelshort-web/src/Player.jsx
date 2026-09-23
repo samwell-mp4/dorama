@@ -132,6 +132,36 @@ export default function Player() {
     }
   }, [bookId, currentEpisodeNum, filteredTitle, currentChapterId, unavailableSeries, isVIPUser]);
 
+  // 2.1. Suporte universal a streaming HLS (.m3u8) para todos os navegadores (Desktop & Mobile)
+  useEffect(() => {
+    if (!videoRef.current || !videoData?.video_url) return;
+    const video = videoRef.current;
+    const src = videoData.video_url;
+
+    let hls = null;
+    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = src;
+    } else if (window.Hls && window.Hls.isSupported()) {
+      hls = new window.Hls({
+        enableWorker: true,
+        lowLatencyMode: true
+      });
+      hls.loadSource(src);
+      hls.attachMedia(video);
+      hls.on(window.Hls.Events.MANIFEST_PARSED, () => {
+        video.play().catch(() => {});
+      });
+    } else {
+      video.src = src;
+    }
+
+    return () => {
+      if (hls) {
+        hls.destroy();
+      }
+    };
+  }, [videoData?.video_url]);
+
   // 3. Salvar progresso
   const handleTimeUpdate = () => {
     if (videoRef.current && isVIPUser) {
@@ -297,7 +327,7 @@ export default function Player() {
                 ref={videoRef}
                 controls
                 autoPlay
-                src={videoData.video_url}
+                playsInline
                 onTimeUpdate={handleTimeUpdate}
                 onEnded={handleVideoEnded}
               >

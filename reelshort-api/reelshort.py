@@ -6,6 +6,7 @@ import requests
 import re
 import json
 import logging
+import urllib.parse
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -200,7 +201,26 @@ class ReelShortAPI:
                 response = requests.get(url, headers=self.headers, timeout=15)
             
             response.raise_for_status()
-            return response.json()
+            data = response.json()
+
+            # Tratar redirecionamento interno do Next.js (ex: episode-1 redirecionando para trailer)
+            if isinstance(data, dict) and data.get("pageProps", {}).get("__N_REDIRECT"):
+                redirect_target = data["pageProps"]["__N_REDIRECT"]
+                logger.info(f"Seguindo Next.js __N_REDIRECT: {redirect_target}")
+                parsed = urllib.parse.urlparse(redirect_target)
+                target_path = parsed.path
+                if target_path.startswith('/pt/'):
+                    target_path = target_path[3:]
+                elif not target_path.startswith('/'):
+                    target_path = '/' + target_path
+                slug = target_path.split('/')[-1]
+                query_params = urllib.parse.parse_qs(parsed.query)
+                query_params['slug'] = [slug]
+                new_query = urllib.parse.urlencode(query_params, doseq=True)
+                new_url = f"https://www.reelshort.com/_next/data/{self.build_id}/pt{target_path}.json?{new_query}"
+                return self._make_request(new_url)
+
+            return data
             
         except requests.exceptions.RequestException as e:
             logger.error(f"Request error: {e}")
@@ -276,9 +296,16 @@ class ReelShortAPI:
             data = self._make_request(url)
             episode_data = data.get("pageProps", {}).get("data", {})
 
+            # Fallback caso a API não tenha retornado video_url no formato padrão
+            if not episode_data.get("video_url") and episode_num == 1:
+                trailer_url = f"{self.base_url}/episodes/trailer-{filtered_title}-{book_id}-{chapter_id}.json?play_time=1&slug=trailer-{filtered_title}-{book_id}-{chapter_id}"
+                trailer_data = self._make_request(trailer_url)
+                if trailer_data.get("pageProps", {}).get("data", {}).get("video_url"):
+                    episode_data = trailer_data["pageProps"]["data"]
+
             return {
                 "video_url": episode_data.get("video_url", ""),
-                "serial_number": episode_data.get("serial_number", 0),
+                "serial_number": episode_data.get("serial_number") or episode_num,
                 "duration": episode_data.get("duration", 0)
             }
         except Exception as e:
