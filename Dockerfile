@@ -1,16 +1,8 @@
-# Estágio 1: Build do Frontend Vite / React
-FROM node:20-alpine AS builder
-WORKDIR /app/reelshort-web
-COPY reelshort-web/package*.json ./
-RUN npm install
-COPY reelshort-web/ ./
-RUN npm run build
-
-# Estágio 2: Ambiente de Produção com Python e Node.js
+# Ambiente de Produção com Python 3.11 e Node.js 20
 FROM python:3.11-slim
 WORKDIR /app
 
-# Instalar Node.js
+# Instalar Node.js 20
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
@@ -24,16 +16,15 @@ RUN pip install --no-cache-dir -r ./reelshort-api/requirements.txt
 COPY package*.json ./
 RUN npm ci --omit=dev
 
-# Copiar código do backend e servidor Express
+# Copiar código do backend, servidor Express e frontend pré-compilado
 COPY reelshort-api/ ./reelshort-api/
+COPY dist/ ./dist/
+COPY reelshort-web/dist/ ./reelshort-web/dist/
 COPY server.js ./
 COPY google_index_submit.js ./
 COPY build_full_sitemaps.js ./
 
-# Copiar build gerado do frontend
-COPY --from=builder /app/reelshort-web/dist ./reelshort-web/dist
-
-ENV PORT=3000
-EXPOSE 3000
+ENV PORT=5000
+EXPOSE 5000 3000
 
 CMD ["node", "server.js"]

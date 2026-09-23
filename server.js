@@ -42,36 +42,41 @@ apiProcess.on('exit', (code, signal) => {
   console.warn(`[Dorama Server] Processo Python encerrou com código ${code} e sinal ${signal}`);
 });
 
-// Proxy reverso transparente para a API Flask interna (porta 5050)
-app.use(
-  createProxyMiddleware({
-    target: `http://127.0.0.1:${API_PORT}`,
-    changeOrigin: true,
-    filter: (pathname) => pathname.startsWith('/api') || pathname.startsWith('/docs') || pathname.startsWith('/swaggerui'),
-    onProxyReq: (proxyReq, req) => {
-      console.log(`[Proxy -> Flask:${API_PORT}] ${req.method} ${req.originalUrl}`);
-    },
-    onError: (err, req, res) => {
-      console.error('[API Proxy Error]:', err.message);
-      res.status(502).json({ error: 'Backend API em inicialização. Tente em alguns instantes.' });
-    }
-  })
-);
+// Proxy reverso transparente APENAS para /api, /docs e /swaggerui (porta interna 5050)
+const apiProxy = createProxyMiddleware({
+  target: `http://127.0.0.1:${API_PORT}`,
+  changeOrigin: true,
+  onProxyReq: (proxyReq, req) => {
+    console.log(`[Proxy -> Flask:${API_PORT}] ${req.method} ${req.originalUrl}`);
+  },
+  onError: (err, req, res) => {
+    console.error('[API Proxy Error]:', err.message);
+    res.status(502).json({ error: 'Backend API em inicialização. Tente em alguns instantes.' });
+  }
+});
+
+app.use((req, res, next) => {
+  if (req.url.startsWith('/api') || req.url.startsWith('/docs') || req.url.startsWith('/swaggerui')) {
+    return apiProxy(req, res, next);
+  }
+  next();
+});
 
 // Servir arquivos estáticos da aplicação compilada (Vite / React)
 const candidateDistDirs = [
-  path.join(__dirname, 'reelshort-web', 'dist'),
-  path.join(__dirname, 'dist'),
-  path.join(__dirname, 'reelshort-api', 'dist'),
+  path.resolve(__dirname, 'dist'),
+  path.resolve(__dirname, 'reelshort-web', 'dist'),
+  path.resolve(__dirname, 'reelshort-api', 'dist'),
   '/app/dist',
   '/app/reelshort-web/dist'
 ];
-const distPath = candidateDistDirs.find(d => fs.existsSync(path.join(d, 'index.html'))) || candidateDistDirs[0];
+const distPath = candidateDistDirs.find(d => fs.existsSync(path.resolve(d, 'index.html'))) || candidateDistDirs[0];
+console.log(`[Dorama Server] Frontend estático carregado de: ${distPath} (index.html: ${fs.existsSync(path.resolve(distPath, 'index.html'))})`);
 app.use(express.static(distPath));
 
 // Fallback SPA para suporte ao React Router (todas as rotas da interface)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(distPath, 'index.html'));
+  res.sendFile(path.resolve(distPath, 'index.html'));
 });
 
 // Ouvir na porta primária do EasyPanel (5000 ou PORT)

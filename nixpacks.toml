@@ -5,14 +5,11 @@ nixPkgs = ["nodejs_20", "python311", "python311Packages.pip", "python311Packages
 cmds = [
   "python3 -m venv /app/.venv",
   "/app/.venv/bin/pip install --no-cache-dir -r reelshort-api/requirements.txt",
-  "npm ci",
-  "cd reelshort-web && npm install --include=optional"
+  "npm ci --omit=dev"
 ]
 
 [phases.build]
-cmds = [
-  "cd reelshort-web && npm run build"
-]
+cmds = []
 
 [variables]
 PATH = "/app/.venv/bin:/app/node_modules/.bin:$PATH"
