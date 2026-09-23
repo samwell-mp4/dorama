@@ -14,6 +14,15 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app)
 
+@app.route('/')
+def home_index():
+    return jsonify({
+        'status': 'online',
+        'service': 'Doramas Dublados API',
+        'health': '/api/health',
+        'docs': '/docs'
+    })
+
 @app.route('/api/health')
 def health_check():
     return jsonify({'status': 'ok', 'service': 'reelshort-api'})
@@ -549,6 +558,6 @@ class BookshelvesResource(Resource):
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('API_PORT') or os.environ.get('FLASK_PORT') or 5000)
+    port = int(os.environ.get('API_PORT') or os.environ.get('FLASK_PORT') or 5050)
     # Pastikan host 0.0.0.0 agar bisa diakses dari device lain
     app.run(host='0.0.0.0', port=port, debug=False)

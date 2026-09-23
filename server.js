@@ -5,11 +5,13 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const { spawn } = require('child_process');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-// Garantir que a porta interna da API Python NUNCA colida com a porta externa do container/EasyPanel
-const API_PORT = process.env.API_PORT || (Number(PORT) === 5000 ? 5001 : 5000);
 
-// Iniciar API Python em segundo plano se executado no mesmo container
+// Porta pública principal (EasyPanel geralmente usa 5000 ou 3000 ou 80)
+const PRIMARY_PORT = Number(process.env.PORT) || 5000;
+// Porta interna da API Python (SEMPRE 5050 para evitar qualquer colisão pública)
+const API_PORT = Number(process.env.API_PORT) || 5050;
+
+// Iniciar API Python em segundo plano na porta interna 5050
 const venvPython = process.platform === 'win32'
   ? path.join(__dirname, '.venv', 'Scripts', 'python.exe')
   : (fs.existsSync(path.join('/app', '.venv', 'bin', 'python')) 
@@ -22,7 +24,7 @@ const pythonCmd = fs.existsSync(venvPython)
 
 const apiScript = path.join(__dirname, 'reelshort-api', 'reelshort.py');
 
-console.log(`[Dorama Server] Inicializando API Python na porta ${API_PORT}: ${pythonCmd} ${apiScript}`);
+console.log(`[Dorama Server] Inicializando API Python na porta interna ${API_PORT}: ${pythonCmd} ${apiScript}`);
 const apiProcess = spawn(pythonCmd, [apiScript], {
   stdio: 'inherit',
   env: { 
@@ -40,16 +42,14 @@ apiProcess.on('exit', (code, signal) => {
   console.warn(`[Dorama Server] Processo Python encerrou com código ${code} e sinal ${signal}`);
 });
 
-// Proxy reverso transparente para a API Flask
-// IMPORTANTE: NÃO montar via app.use('/api', ...) pois o Express remove o prefixo '/api'.
-// Utilizando filter com a URL completa, a requisição '/api/v1/reelshort/...' é repassada intacta para o Flask!
+// Proxy reverso transparente para a API Flask interna (porta 5050)
 app.use(
   createProxyMiddleware({
     target: `http://127.0.0.1:${API_PORT}`,
     changeOrigin: true,
-    filter: (pathname) => pathname.startsWith('/api'),
+    filter: (pathname) => pathname.startsWith('/api') || pathname.startsWith('/docs') || pathname.startsWith('/swaggerui'),
     onProxyReq: (proxyReq, req) => {
-      console.log(`[Proxy -> Flask] ${req.method} ${req.originalUrl}`);
+      console.log(`[Proxy -> Flask:${API_PORT}] ${req.method} ${req.originalUrl}`);
     },
     onError: (err, req, res) => {
       console.error('[API Proxy Error]:', err.message);
@@ -62,16 +62,29 @@ app.use(
 const distPath = path.join(__dirname, 'reelshort-web', 'dist');
 app.use(express.static(distPath));
 
-// Fallback SPA para suporte ao React Router (todas as URLs não-API carregam index.html)
+// Fallback SPA para suporte ao React Router (todas as rotas da interface)
 app.get('*', (req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+// Ouvir na porta primária do EasyPanel (5000 ou PORT)
+app.listen(PRIMARY_PORT, '0.0.0.0', () => {
   console.log(`====================================================`);
   console.log(`🚀 DORAMAS DUBLADOS ONLINE - SERVIDOR DE PRODUÇÃO`);
-  console.log(`Porta Web Pública: ${PORT}`);
+  console.log(`Porta Web Pública: ${PRIMARY_PORT}`);
   console.log(`Porta API Interna: ${API_PORT}`);
   console.log(`Frontend estático: ${distPath}`);
   console.log(`====================================================`);
 });
+
+// Ouvir adicionalmente na porta alternativa (3000 ou 5000) para cobrir qualquer configuração do EasyPanel
+const SECONDARY_PORT = PRIMARY_PORT === 5000 ? 3000 : (PRIMARY_PORT === 3000 ? 5000 : null);
+if (SECONDARY_PORT) {
+  try {
+    app.listen(SECONDARY_PORT, '0.0.0.0', () => {
+      console.log(`[Dorama Server] Também escutando na porta secundária: ${SECONDARY_PORT}`);
+    });
+  } catch (err) {
+    console.warn(`[Dorama Server] Porta secundária ${SECONDARY_PORT} não iniciada:`, err.message);
+  }
+}
