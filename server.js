@@ -7,8 +7,19 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const API_PORT = process.env.API_PORT || 5000;
 
+const fs = require('fs');
+
 // Iniciar API Python em segundo plano se executado no mesmo container
-const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
+const venvPython = process.platform === 'win32'
+  ? path.join(__dirname, '.venv', 'Scripts', 'python.exe')
+  : (fs.existsSync(path.join('/app', '.venv', 'bin', 'python')) 
+      ? path.join('/app', '.venv', 'bin', 'python') 
+      : path.join(__dirname, '.venv', 'bin', 'python'));
+
+const pythonCmd = fs.existsSync(venvPython)
+  ? venvPython
+  : (process.platform === 'win32' ? 'python' : 'python3');
+
 const apiScript = path.join(__dirname, 'reelshort-api', 'reelshort.py');
 
 console.log(`[Dorama Server] Inicializando API Python: ${pythonCmd} ${apiScript}`);
