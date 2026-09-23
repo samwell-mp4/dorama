@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+Allow: /filmes
+Allow: /series/
+Allow: /generos/
+Allow: /em-alta
+Allow: /lancamentos
+Allow: /blog/
+Allow: /top-10
+Allow: /como-assistir
+
+# Bloquear páginas dinâmicas ou privadas sem valor de busca
+Disallow: /buscar?*
+Disallow: /minha-lista
+Disallow: /historico
+Disallow: /configuracoes
+
+Sitemap: https://doramasdublados.online/sitemap.xml
+Sitemap: https://doramasdublados.online/sitemaps/series.xml
+Sitemap: https://doramasdublados.online/sitemaps/blog.xml

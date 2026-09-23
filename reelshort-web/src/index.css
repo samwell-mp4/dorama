@@ -1,0 +1,8 @@
+@import './styles/designSystem.css';
+
+/* Ajustes complementares globais */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}

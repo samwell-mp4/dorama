@@ -1,0 +1,145 @@
+/* =========================================================
+   HOME CINEMATIC HERO & PROMO STYLES
+========================================================= */
+
+.hero-cinematic {
+  position: relative;
+  min-height: clamp(480px, 72vh, 740px);
+  display: flex;
+  align-items: flex-end;
+  padding: var(--space-48) 0;
+  margin-bottom: var(--space-32);
+  overflow: hidden;
+}
+
+.hero-cinematic-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.hero-cinematic-backdrop img,
+.hero-cinematic-backdrop video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+}
+
+.hero-cinematic-gradient {
+  position: absolute;
+  inset: 0;
+  background: 
+    linear-gradient(to top, var(--bg-main) 10%, rgba(8, 8, 16, 0.85) 35%, rgba(8, 8, 16, 0.2) 70%, rgba(8, 8, 16, 0.8) 100%),
+    linear-gradient(to right, var(--bg-main) 0%, rgba(8, 8, 16, 0.8) 40%, transparent 100%);
+  z-index: 2;
+}
+
+.hero-cinematic-content {
+  position: relative;
+  z-index: 3;
+  max-width: 720px;
+}
+
+.hero-badges-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  margin-bottom: var(--space-16);
+  flex-wrap: wrap;
+}
+
+.hero-title {
+  font-size: clamp(2.2rem, 5vw + 0.5rem, 4rem);
+  font-weight: 900;
+  line-height: 1.05;
+  margin-bottom: var(--space-12);
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+.hero-meta-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  font-size: 0.95rem;
+  color: #E2E2EC;
+  margin-bottom: var(--space-16);
+  font-weight: 500;
+}
+
+.hero-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #FFB800;
+  font-weight: 700;
+}
+
+.hero-synopsis {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-24);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.hero-actions-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  flex-wrap: wrap;
+}
+
+/* VIP Offer Ribbon Banner */
+.vip-offer-strip {
+  background: linear-gradient(90deg, rgba(229, 9, 20, 0.15), rgba(255, 184, 0, 0.15));
+  border: 1px solid rgba(255, 184, 0, 0.3);
+  border-radius: var(--radius-lg);
+  padding: var(--space-16) var(--space-24);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-48);
+  backdrop-filter: blur(12px);
+  gap: var(--space-16);
+  flex-wrap: wrap;
+}
+
+.vip-offer-strip-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+}
+
+.vip-offer-strip-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 184, 0, 0.2);
+  color: #FFB800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.vip-offer-strip h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 2px;
+}
+
+.vip-offer-strip p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.vip-offer-strip p span {
+  color: #FFB800;
+  font-weight: 700;
+}

@@ -1,0 +1,33 @@
+# dependencies
+node_modules/
+reelshort-web/node_modules/
+/.pnp
+.pnp.js
+
+# testing & coverage
+/coverage
+
+# production builds
+/build
+dist/
+reelshort-web/dist/
+
+# credentials & secrets
+google-indexing-key.json
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Python cache
+__pycache__/
+reelshort-api/__pycache__/
+*.pyc
+
+# logs & misc
+.DS_Store
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

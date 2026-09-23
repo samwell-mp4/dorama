@@ -1,0 +1,264 @@
+/* =========================================================
+   CINEMATIC VIDEO PLAYER STYLES
+========================================================= */
+
+.player-view {
+  background: #000;
+  min-height: calc(100vh - var(--topbar-height));
+  padding-bottom: var(--space-48);
+}
+
+.player-theater {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto var(--space-24);
+  background: #000;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+}
+
+.video-element-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-element-wrapper video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Next Episode Countdown Overlay */
+.next-countdown-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 8, 16, 0.92);
+  backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-16);
+  z-index: 50;
+  animation: fadeIn 0.3s ease;
+}
+
+.countdown-number {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 3px solid var(--accent-coral);
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 24px var(--accent-glow);
+}
+
+/* Player Navigation & Bottom Controls Bar */
+.player-bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-16) var(--space-20);
+  background: var(--bg-surface);
+  border-top: 1px solid var(--glass-border);
+  flex-wrap: wrap;
+  gap: var(--space-12);
+}
+
+.player-episode-info h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.player-episode-info p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.player-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+/* Episode Quick Selector Drawer / Grid */
+.player-episodes-drawer {
+  margin-top: var(--space-32);
+}
+
+.player-preview-banner {
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.15), rgba(229, 9, 20, 0.15));
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  margin: var(--space-12) var(--space-12) 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.player-btn-details {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .player-theater {
+    border-radius: 0;
+    margin-bottom: var(--space-16);
+  }
+
+  .player-preview-banner {
+    margin: 8px 8px 0;
+    padding: 8px 12px;
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .player-preview-banner .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .player-bottom-bar {
+    padding: 12px 10px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .player-episode-info h2 {
+    font-size: 0.98rem;
+    line-height: 1.3;
+  }
+
+  .player-nav-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    box-sizing: border-box;
+  }
+
+  .player-nav-actions .btn {
+    padding: 10px 8px;
+    font-size: 0.84rem;
+    justify-content: center;
+    min-height: 42px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .player-nav-actions .player-btn-details {
+    grid-column: span 2;
+    width: 100%;
+    margin-top: 2px;
+  }
+}
+
+/* VIP Theater Lock Overlay */
+.vip-theater-lock-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 90% 70% at 50% 30%, rgba(229, 9, 20, 0.28), rgba(8, 8, 16, 0.97) 80%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  z-index: 20;
+  overflow-y: auto;
+}
+
+.vip-theater-lock-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 184, 0, 0.15);
+  border: 2px solid #FFB800;
+  color: #FFB800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  box-shadow: 0 0 20px rgba(255, 184, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.vip-theater-lock-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.vip-theater-lock-desc {
+  max-width: 460px;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  margin-bottom: 18px;
+  line-height: 1.45;
+}
+
+.vip-theater-lock-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+@media (max-width: 600px) {
+  .vip-theater-lock-overlay {
+    padding: 12px 14px;
+  }
+  .vip-theater-lock-icon {
+    width: 38px;
+    height: 38px;
+    margin-bottom: 6px;
+  }
+  .vip-theater-lock-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+  .vip-theater-lock-title {
+    font-size: 1.15rem;
+    margin-bottom: 4px;
+  }
+  .vip-theater-lock-desc {
+    font-size: 0.78rem;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+  .vip-theater-lock-actions {
+    gap: 8px;
+    width: 100%;
+  }
+  .vip-theater-lock-actions .btn {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    flex: 1 1 auto;
+    min-height: 36px;
+  }
+}
+
