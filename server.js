@@ -59,7 +59,14 @@ app.use(
 );
 
 // Servir arquivos estáticos da aplicação compilada (Vite / React)
-const distPath = path.join(__dirname, 'reelshort-web', 'dist');
+const candidateDistDirs = [
+  path.join(__dirname, 'reelshort-web', 'dist'),
+  path.join(__dirname, 'dist'),
+  path.join(__dirname, 'reelshort-api', 'dist'),
+  '/app/dist',
+  '/app/reelshort-web/dist'
+];
+const distPath = candidateDistDirs.find(d => fs.existsSync(path.join(d, 'index.html'))) || candidateDistDirs[0];
 app.use(express.static(distPath));
 
 // Fallback SPA para suporte ao React Router (todas as rotas da interface)

@@ -14,7 +14,17 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app)
 
-DIST_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'reelshort-web', 'dist'))
+# Diretórios candidatos para o frontend estático compilado (SPA)
+CANDIDATE_DIRS = [
+    os.path.abspath(os.path.join(os.path.dirname(__file__), 'dist')),
+    os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'reelshort-web', 'dist')),
+    os.path.abspath('/app/reelshort-web/dist'),
+    os.path.abspath('/app/reelshort-api/dist'),
+    os.path.abspath('/app/dist')
+]
+
+DIST_DIR = next((d for d in CANDIDATE_DIRS if os.path.exists(os.path.join(d, 'index.html'))), CANDIDATE_DIRS[0])
+print(f"[Doramas Backend] Frontend estático compilado carregado de: {DIST_DIR} (Existe: {os.path.exists(DIST_DIR)})")
 
 @app.route('/api/health')
 def health_check():
