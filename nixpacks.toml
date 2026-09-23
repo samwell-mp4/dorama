@@ -6,7 +6,7 @@ cmds = [
   "python3 -m venv /app/.venv",
   "/app/.venv/bin/pip install --no-cache-dir -r reelshort-api/requirements.txt",
   "npm ci",
-  "cd reelshort-web && npm install"
+  "cd reelshort-web && npm install --include=optional"
 ]
 
 [phases.build]
