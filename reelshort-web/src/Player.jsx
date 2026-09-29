@@ -8,6 +8,8 @@ import Breadcrumbs from './components/common/Breadcrumbs';
 import AdBanner from './components/common/AdBanner';
 import './pages/player.css';
 
+const SPONSOR_AD_URL = 'https://www.profitableratecpmnetwork.com/jywn39jgs?key=759b34e4b3be1787f2495ffd288cd698';
+
 export default function Player() {
   const params = useParams();
   const location = useLocation();
@@ -29,8 +31,26 @@ export default function Player() {
   const [loading, setLoading] = useState(true);
   const [countdown, setCountdown] = useState(null);
   const [unavailableSeries, setUnavailableSeries] = useState(false);
+  const [hasTriggeredSponsor, setHasTriggeredSponsor] = useState(false);
 
   const videoRef = useRef(null);
+
+  // Resetar estado de patrocinador para exigir 2 cliques a cada novo episódio
+  useEffect(() => {
+    setHasTriggeredSponsor(false);
+  }, [currentEpisodeNum, currentChapterId]);
+
+  // Primeiro clique: abre o patrocinador em nova aba e libera o player
+  const handleSponsorClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      window.open(SPONSOR_AD_URL, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      console.warn('Erro ao abrir link do patrocinador:', err);
+    }
+    setHasTriggeredSponsor(true);
+  };
 
   // 1. Obter lista de episódios para resolver chapter_id e verificar disponibilidade
   useEffect(() => {
@@ -127,7 +147,7 @@ export default function Player() {
       hls.loadSource(src);
       hls.attachMedia(video);
       hls.on(window.Hls.Events.MANIFEST_PARSED, () => {
-        video.play().catch(() => {});
+        // Aguarda os 2 cliques do usuário antes de reproduzir
       });
     } else {
       video.src = src;
@@ -264,16 +284,38 @@ export default function Player() {
             {loading ? (
               <div className="skeleton" style={{ width: '100%', height: '100%' }} />
             ) : videoData?.video_url ? (
-              <video
-                ref={videoRef}
-                controls
-                autoPlay
-                playsInline
-                onTimeUpdate={handleTimeUpdate}
-                onEnded={handleVideoEnded}
-              >
-                Seu navegador não suporta a reprodução deste vídeo.
-              </video>
+              <>
+                <video
+                  ref={videoRef}
+                  controls
+                  playsInline
+                  onTimeUpdate={handleTimeUpdate}
+                  onEnded={handleVideoEnded}
+                >
+                  Seu navegador não suporta a reprodução deste vídeo.
+                </video>
+
+                {/* Overlay do Patrocinador / 2 Cliques para Reproduzir */}
+                {!hasTriggeredSponsor && (
+                  <div 
+                    className="player-sponsor-overlay"
+                    onClick={handleSponsorClick}
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Clique para dar o play e assistir"
+                  >
+                    <div className="sponsor-play-btn">
+                      <Play size={38} fill="#fff" color="#fff" style={{ marginLeft: '4px' }} />
+                    </div>
+                    <span className="sponsor-play-text">
+                      Clique para Dar o Play
+                    </span>
+                    <span className="sponsor-play-sub">
+                      Apoie nosso streaming 100% grátis
+                    </span>
+                  </div>
+                )}
+              </>
             ) : (
               <div style={{ textAlign: 'center', padding: '40px', color: '#fff' }}>
                 <AlertCircle size={44} style={{ color: 'var(--accent-coral)', marginBottom: '12px' }} />
