@@ -12,7 +12,9 @@ import {
   Settings, 
   User,
   BookOpen,
-  Trophy
+  Trophy,
+  Heart,
+  PlayCircle
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -29,11 +31,19 @@ export default function Sidebar() {
         </NavLink>
 
         <NavLink 
-          to="/filmes" 
+          to="/assistir-doramas-gratis" 
           className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
         >
-          <div className="sidebar-link-icon"><Film size={20} /></div>
-          <span className="sidebar-link-text">Filmes</span>
+          <div className="sidebar-link-icon"><PlayCircle size={20} style={{ color: '#10B981' }} /></div>
+          <span className="sidebar-link-text">Assistir Grátis</span>
+        </NavLink>
+
+        <NavLink 
+          to="/doramas-love" 
+          className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+        >
+          <div className="sidebar-link-icon"><Heart size={20} style={{ color: '#FF3366' }} /></div>
+          <span className="sidebar-link-text">Doramas Love</span>
         </NavLink>
 
         <NavLink 
@@ -74,6 +84,14 @@ export default function Sidebar() {
         >
           <div className="sidebar-link-icon"><BookOpen size={20} /></div>
           <span className="sidebar-link-text">Blog</span>
+        </NavLink>
+
+        <NavLink 
+          to="/mapa-do-site" 
+          className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+        >
+          <div className="sidebar-link-icon"><Film size={20} style={{ color: '#10B981' }} /></div>
+          <span className="sidebar-link-text">Diretório / SEO</span>
         </NavLink>
 
         <div className="sidebar-divider" />

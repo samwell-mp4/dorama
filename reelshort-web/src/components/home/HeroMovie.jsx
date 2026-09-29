@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Plus, Check, Info, Star, Volume2, VolumeX } from 'lucide-react';
+import { Play, Plus, Check, Info, Star, Sparkles } from 'lucide-react';
 import { normalizeMedia, isInMyList, toggleMyList } from '../../data/dataLayer';
-import { authService } from '../../data/authService';
-import VIPPaywallModal from '../auth/VIPPaywallModal';
 import './home.css';
 
 export default function HeroMovie({ rawMedia }) {
@@ -13,17 +11,10 @@ export default function HeroMovie({ rawMedia }) {
   if (!media) return null;
 
   const [inList, setInList] = useState(isInMyList(media.id));
-  const [muted, setMuted] = useState(true);
-  const [isPaywallOpen, setIsPaywallOpen] = useState(false);
 
   const handlePlay = () => {
-    if (!authService.isAuthenticated() || !authService.isVIP()) {
-      setIsPaywallOpen(true);
-      return;
-    }
     navigate(`/series/${media.slug}/temporada-1/episodio-1`);
   };
-
 
   const handleDetails = () => {
     navigate(`/series/${media.slug}`);
@@ -53,8 +44,10 @@ export default function HeroMovie({ rawMedia }) {
         <div className="hero-cinematic-content">
           <div className="hero-badges-row">
             <span className="badge badge-accent">#1 Em Alta Hoje</span>
-            <span className="badge badge-vip">Original Doramas Dublados</span>
-            <span className="badge badge-hd">4K Ultra HD</span>
+            <span className="badge" style={{ background: '#10B981', color: '#fff', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <Sparkles size={13} /> 100% Grátis Dublado
+            </span>
+            <span className="badge badge-hd">Full HD 1080p</span>
           </div>
 
           <h1 className="hero-title">{media.title}</h1>
@@ -77,7 +70,7 @@ export default function HeroMovie({ rawMedia }) {
 
           <div className="hero-actions-row">
             <button className="btn btn-primary" onClick={handlePlay}>
-              <Play size={20} fill="currentColor" /> Assistir Ep. 1
+              <Play size={20} fill="currentColor" /> Assistir Grátis
             </button>
             <button className="btn btn-secondary" onClick={handleToggleList}>
               {inList ? <Check size={18} /> : <Plus size={18} />}
@@ -89,16 +82,6 @@ export default function HeroMovie({ rawMedia }) {
           </div>
         </div>
       </div>
-
-      <VIPPaywallModal
-        isOpen={isPaywallOpen}
-        onClose={() => setIsPaywallOpen(false)}
-        onSuccess={() => {
-          setIsPaywallOpen(false);
-          navigate(`/series/${media.slug}/temporada-1/episodio-1`);
-        }}
-      />
     </section>
   );
 }
-

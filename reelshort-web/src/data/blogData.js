@@ -283,33 +283,33 @@ export const BLOG_POSTS = [
     ],
     contentSections: [
       {
-        id: 'o-que-e-o-vip',
-        heading: 'O Que é a Licença VIP do Doramas Dublados?',
+        id: 'streaming-gratis',
+        heading: 'Streaming 100% Grátis: Sem Mensalidades e Sem Cartão',
         paragraphs: [
-          'A licença VIP é um passe de acesso completo criado para democratizar o entretenimento cinematográfico. Por um valor único e simbólico de R$ 5,00, você tem permissão total para assistir a todos os episódios de todas as séries do catálogo sem anúncios ou cobranças mensais automáticas.',
-          'Diferente de grandes serviços de streaming que cobram assinaturas recorrentes de R$ 40 a R$ 60 por mês no cartão de crédito, aqui você paga apenas R$ 5,00 de maneira simples via Pix e aproveita.'
+          'A plataforma Doramas Dublados foi reformulada para ser totalmente gratuita e acessível a todos! Agora você tem permissão total para assistir a todos os episódios de todas as séries e novelas do catálogo sem precisar pagar planos nem assinaturas recorrentes.',
+          'Diferente de grandes serviços de streaming que cobram de R$ 40 a R$ 60 por mês no cartão de crédito, aqui você assiste a novelas e doramas dublados em alta definição sem custos, sustentado de forma transparente por anúncios publicitários.'
         ],
-        highlight: 'Pagamento único e direto via WhatsApp oficial: sem assinaturas ocultas, sem cartão de crédito obrigatório e com ativação imediata.'
+        highlight: 'Acesso 100% gratuito e direto: sem assinaturas ocultas, sem cartão de crédito e com reprodução imediata de todos os episódios.'
       },
       {
         id: 'passo-a-passo',
-        heading: 'Passo a Passo de Ativação no WhatsApp',
+        heading: 'Como Começar a Assistir Agora',
         paragraphs: [
-          '1. Toque no botão "Comprar Licença VIP" no site ou envie uma mensagem direta para o WhatsApp oficial: (31) 98886-8362.',
-          '2. Solicite sua chave Pix no valor de R$ 5,00 ao atendente.',
-          '3. Após o envio do comprovante, o atendente criará seu login com e-mail/WhatsApp e senha exclusiva.',
-          '4. Acesse a página /login, insira seus dados e assista a qualquer dorama sem travas!'
+          '1. Acesse o catálogo de séries e novelas e escolha seu título favorito.',
+          '2. Clique na obra desejada para conferir a sinopse e a grade completa de capítulos.',
+          '3. Selecione o episódio desejado — todos estão liberados gratuitamente em alta definição!',
+          '4. Dê o play e aproveite o áudio dublado em português no seu smartphone, computador ou Smart TV.'
         ]
       }
     ],
     faqs: [
       {
-        question: 'Qual é o número oficial do WhatsApp para atendimento?',
-        answer: 'O número exclusivo e oficial é (31) 98886-8362 (DDD 31 - Minas Gerais).'
+        question: 'O site é realmente 100% gratuito?',
+        answer: 'Sim! Todos os doramas e episódios estão liberados sem custo algum. A plataforma é mantida através de anúncios (Google AdSense).'
       },
       {
-        question: 'O valor de R$ 5,00 é mensalidade?',
-        answer: 'Não! O valor de R$ 5,00 é uma taxa única de liberação da licença VIP para assistir a todo o catálogo disponível.'
+        question: 'Preciso cadastrar cartão de crédito?',
+        answer: 'Não! Você pode assistir diretamente pelo navegador sem informar dados de pagamento nem cartão.'
       }
     ]
   },

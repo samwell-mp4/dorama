@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
-import { Play, Plus, Check, Star, Share2, AlertCircle, BookOpen, Trophy } from 'lucide-react';
+import { Play, Plus, Check, Star, Share2, BookOpen, Trophy, Sparkles } from 'lucide-react';
 import { api } from '../api';
 import { parseSlug, normalizeMedia, isInMyList, toggleMyList, filterAvailableContent, addUnavailableId } from '../data/dataLayer';
 import SEOHead, { buildSeriesSchema, buildBreadcrumbSchema } from '../components/seo/SEOHead';
 import Breadcrumbs from '../components/common/Breadcrumbs';
 import MediaCarousel from '../components/media/MediaCarousel';
-import { authService } from '../data/authService';
-import VIPPaywallModal from '../components/auth/VIPPaywallModal';
+import AdBanner from '../components/common/AdBanner';
 
 import './details.css';
 
@@ -29,10 +28,8 @@ export default function MediaDetails() {
   const [loading, setLoading] = useState(!stateMedia);
   const [inList, setInList] = useState(false);
   const [errorState, setErrorState] = useState(false);
-  const [isPaywallOpen, setIsPaywallOpen] = useState(false);
-  const [pendingEpisode, setPendingEpisode] = useState(null);
 
-  // Garantir que a página sempre inicie no topo exato (0, 0) no celular e desktop
+  // Garantir que a página sempre inicie no topo exato (0, 0)
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     if (document.documentElement) document.documentElement.scrollTop = 0;
@@ -50,7 +47,7 @@ export default function MediaDetails() {
         const epData = await api.getEpisodes(bookId, filteredTitle);
         const fetchedEpisodes = epData?.episodes || [];
 
-        // REGRA CRÍTICA: Se não possui nenhum episódio válido, auto-registrar na blacklist e redirecionar
+        // Se não possui nenhum episódio válido, auto-registrar na blacklist e redirecionar
         if (!fetchedEpisodes || fetchedEpisodes.length === 0) {
           addUnavailableId(bookId);
           console.warn(`[Auto-Heal] Series ${bookId} has 0 episodes. Redirecting away from broken content.`);
@@ -63,7 +60,6 @@ export default function MediaDetails() {
         if (isMounted) {
           setEpisodes(fetchedEpisodes);
 
-          // Puxar títulos, capa e sinopse reais vindos da API oficial
           const realTitle = epData.book_title || stateMedia?.title || (parsed.title ? parsed.title.toUpperCase() : filteredTitle.replace(/-/g, ' ').toUpperCase());
           const realPoster = epData.book_pic || stateMedia?.poster || '';
           const realDesc = epData.special_desc || stateMedia?.synopsis || 'Acompanhe os episódios completos desta produção dramática com reviravoltas intensas e histórias envolventes.';
@@ -74,7 +70,7 @@ export default function MediaDetails() {
             filtered_title: filteredTitle,
             chapter_count: fetchedEpisodes.length,
             book_pic: realPoster,
-            backdrop: realPoster, // Contra-capa usa a imagem autêntica de cada título
+            backdrop: realPoster,
             special_desc: realDesc,
             episodes: fetchedEpisodes
           });
@@ -115,28 +111,11 @@ export default function MediaDetails() {
     };
   }, [bookId, filteredTitle, slug, navigate]);
 
+  // Acesso 100% Livre: Todos os episódios são reproduzidos diretamente
   const handlePlayEpisode = (ep) => {
     const epNum = Number(ep?.episode || ep?.serial_number || 1);
-
-    // REGRA DE PRÉVIA GRÁTIS: O 1º episódio é liberado para todos assistirem à prévia!
-    if (epNum === 1 || authService.isVIP()) {
-      navigate(`/series/${mediaInfo?.slug || slug}/temporada-1/episodio-${epNum}`);
-      return;
-    }
-
-    // A partir do episódio 2, exige acesso VIP
-    setPendingEpisode(ep);
-    setIsPaywallOpen(true);
+    navigate(`/series/${mediaInfo?.slug || slug}/temporada-1/episodio-${epNum}`);
   };
-
-  const handlePaywallSuccess = () => {
-    setIsPaywallOpen(false);
-    const targetEp = pendingEpisode || episodes[0];
-    if (targetEp) {
-      navigate(`/series/${mediaInfo?.slug || slug}/temporada-1/episodio-${targetEp.episode || targetEp.serial_number || 1}`);
-    }
-  };
-
 
   const handleToggleList = () => {
     if (mediaInfo) {
@@ -148,7 +127,7 @@ export default function MediaDetails() {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: mediaInfo?.title || 'Doramas Dublados',
+        title: `${mediaInfo?.title || 'Dorama'} - Doramas Dublados Grátis`,
         url: window.location.href
       }).catch(() => {});
     } else {
@@ -157,14 +136,13 @@ export default function MediaDetails() {
     }
   };
 
-  // Se por qualquer razão ocorrer erro, redirecionar de imediato sem exibir tela de erro
   if (errorState && !loading) {
     navigate('/series', { replace: true });
     return null;
   }
 
   const breadcrumbs = [
-    { name: 'Séries', url: '/series' },
+    { name: 'Séries & Novelas', url: '/series' },
     { name: mediaInfo?.title || 'Detalhes', url: '#' }
   ];
 
@@ -180,8 +158,8 @@ export default function MediaDetails() {
     <div className="details-view">
       {mediaInfo && (
         <SEOHead
-          title={`${mediaInfo.title} (${mediaInfo.year}) — Assistir, Sinopse e Informações`}
-          description={`Assista a todos os episódios de ${mediaInfo.title} dublado em português. Sinopse completa, elenco e episódios disponíveis em HD no Doramas Dublados.`}
+          title={`${mediaInfo.title} (${mediaInfo.year}) — Assistir Novela e Dorama Completo Dublado Grátis`}
+          description={`Assista a todos os episódios de ${mediaInfo.title} dublado em português grátis em HD. Sinopse completa, episódios liberados sem mensalidade no Doramas Dublados Grátis.`}
           canonicalUrl={currentUrl}
           ogImage={mediaInfo.poster}
           ogType="video.tv_show"
@@ -221,7 +199,9 @@ export default function MediaDetails() {
                 <span>•</span>
                 <span>{mediaInfo?.year}</span>
                 <span>•</span>
-                <span className="badge badge-vip">Original</span>
+                <span className="badge" style={{ background: '#10B981', color: '#fff', fontWeight: 700 }}>
+                  100% Grátis
+                </span>
                 <span>•</span>
                 <span>{episodes.length} Episódios</span>
                 <span>•</span>
@@ -235,7 +215,7 @@ export default function MediaDetails() {
               <div className="details-actions-bar">
                 {episodes.length > 0 && (
                   <button className="btn btn-primary" onClick={() => handlePlayEpisode(episodes[0])}>
-                    <Play size={20} fill="currentColor" /> Assistir 1º Ep. Grátis
+                    <Play size={20} fill="currentColor" /> Assistir Grátis (Ep. 1)
                   </button>
                 )}
                 <button className="btn btn-secondary" onClick={handleToggleList}>
@@ -253,10 +233,23 @@ export default function MediaDetails() {
 
       {/* Conteúdo Principal: Temporadas e Grade de Episódios */}
       <div className="cinematic-container">
+        {/* Anúncio AdSense Superior nos Detalhes */}
+        <AdBanner 
+          slot="2000000001" 
+          style={{ margin: '24px auto' }} 
+          label="PUBLICIDADE" 
+        />
+
         <section className="episodes-section">
           <div className="episodes-header-row">
-            <h2>Episódios Disponíveis</h2>
-            <div className="season-tab-btn">
+            <div>
+              <h2>Episódios Disponíveis</h2>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '4px 0 0 0' }}>
+                Todos os episódios completos, dublados em português e liberados gratuitamente.
+              </p>
+            </div>
+            <div className="season-tab-btn" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Sparkles size={14} style={{ color: '#10B981' }} />
               Temporada 1 ({episodes.length} episódios)
             </div>
           </div>
@@ -264,12 +257,12 @@ export default function MediaDetails() {
           <div className="episodes-list">
             {episodes.map((ep, idx) => {
               const epNum = Number(ep.episode || ep.serial_number || idx + 1);
-              const isFreePreview = epNum === 1;
               return (
                 <div 
                   key={ep.chapter_id || ep.episode || idx}
                   className="episode-item-card"
                   onClick={() => handlePlayEpisode(ep)}
+                  title={`Assistir Episódio ${epNum} Grátis`}
                 >
                   <div className="episode-item-badge">
                     {epNum}
@@ -279,28 +272,27 @@ export default function MediaDetails() {
                       <h3 className="episode-item-title">
                         Episódio {epNum}
                       </h3>
-                      {isFreePreview ? (
-                        <span className="preview-badge-pill" style={{ fontSize: '0.65rem' }}>
-                          PRÉVIA GRÁTIS
-                        </span>
-                      ) : (
-                        !authService.isVIP() && (
-                          <span className="badge badge-vip" style={{ fontSize: '0.65rem', padding: '1px 6px' }}>
-                            VIP
-                          </span>
-                        )
-                      )}
+                      <span className="badge" style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#10B981', border: '1px solid rgba(16, 185, 129, 0.4)', fontSize: '0.65rem', padding: '1px 6px', fontWeight: 700 }}>
+                        GRÁTIS
+                      </span>
                     </div>
                     <div className="episode-item-meta">
-                      {isFreePreview ? 'Liberado para Assistir • Dublado em HD' : 'Disponível com VIP R$ 5 • Dublado em HD'}
+                      Liberado para Assistir • Dublado em HD • Completo
                     </div>
                   </div>
-                  <Play size={18} style={{ color: isFreePreview ? '#10B981' : 'var(--accent-coral)', marginLeft: 'auto' }} />
+                  <Play size={18} style={{ color: '#10B981', marginLeft: 'auto' }} />
                 </div>
               );
             })}
           </div>
         </section>
+
+        {/* Anúncio AdSense Central nos Detalhes */}
+        <AdBanner 
+          slot="2000000002" 
+          style={{ margin: '32px auto' }} 
+          label="PUBLICIDADE" 
+        />
 
         {/* Títulos Relacionados */}
         {related.length > 0 && (
@@ -329,28 +321,28 @@ export default function MediaDetails() {
             </Link>
           </div>
         </section>
+
+        {/* Anúncio AdSense Inferior nos Detalhes */}
+        <AdBanner 
+          slot="2000000003" 
+          style={{ margin: '20px auto 40px' }} 
+          label="PUBLICIDADE" 
+        />
       </div>
 
-      {/* Botão Flutuante de Prévia Grátis (posicionado estrategicamente sem sobrepor o WhatsApp) */}
+      {/* Botão Flutuante de Assistir Grátis */}
       {episodes.length > 0 && (
         <button 
           className="floating-preview-cta" 
           onClick={() => handlePlayEpisode(episodes[0])}
-          aria-label="Assistir 1º episódio grátis"
+          aria-label="Assistir dorama grátis"
+          style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}
         >
           <Play size={18} fill="currentColor" />
-          <span>Assistir Prévia</span>
-          <span className="preview-badge-pill">Ep. 1 Grátis</span>
+          <span>Assistir Agora</span>
+          <span className="preview-badge-pill" style={{ background: '#fff', color: '#059669' }}>100% Grátis</span>
         </button>
       )}
-
-      {/* Modal VIP acionado ao clicar em episódios sem login */}
-      <VIPPaywallModal
-        isOpen={isPaywallOpen}
-        onClose={() => setIsPaywallOpen(false)}
-        onSuccess={handlePaywallSuccess}
-      />
     </div>
   );
 }
-

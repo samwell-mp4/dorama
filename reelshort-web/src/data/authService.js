@@ -189,8 +189,8 @@ export const authService = {
   },
 
   isVIP: () => {
-    const user = authService.getCurrentUser();
-    return Boolean(user && user.isVIP);
+    // Modelo 100% Grátis sustentado por Anúncios: Todo visitante tem acesso total e livre a todos os episódios
+    return true;
   },
 
   isAdmin: () => {

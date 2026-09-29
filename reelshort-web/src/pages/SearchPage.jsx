@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Sparkles, Filter, AlertCircle } from 'lucide-react';
+import { Search, AlertCircle } from 'lucide-react';
 import { api } from '../api';
 import { filterAvailableContent } from '../data/dataLayer';
 import MediaCard from '../components/media/MediaCard';
 import SEOHead from '../components/seo/SEOHead';
 import Breadcrumbs from '../components/common/Breadcrumbs';
+import AdBanner from '../components/common/AdBanner';
 
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -14,7 +15,6 @@ export default function SearchPage() {
   const [searchTerm, setSearchTerm] = useState(initialQuery);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState('all'); // all, series, movies
 
   // Sincronizar parâmetro de busca quando a URL mudar
   useEffect(() => {
@@ -24,7 +24,7 @@ export default function SearchPage() {
     }
   }, [initialQuery]);
 
-  // Debounce de busca automática (Search-as-you-type)
+  // Debounce de busca automática
   useEffect(() => {
     if (!searchTerm.trim()) {
       setResults([]);
@@ -44,7 +44,6 @@ export default function SearchPage() {
     try {
       const data = await api.searchDrama(keywords);
       if (data && data.results) {
-        // REGRA CRÍTICA: Filtrar estritamente quaisquer itens com 0 episódios
         const validResults = filterAvailableContent(data.results);
         setResults(validResults);
       } else {
@@ -65,20 +64,20 @@ export default function SearchPage() {
   return (
     <div className="search-view" style={{ padding: 'var(--space-32) 0 var(--space-64)' }}>
       <SEOHead
-        title={searchTerm ? `Resultados para "${searchTerm}" — Busca` : 'Busca — Encontre Doramas e Séries'}
-        description="Pesquise por títulos, atores e gêneros em todo o catálogo do Doramas Dublados."
+        title={searchTerm ? `Resultados para "${searchTerm}" — Busca de Doramas Grátis` : 'Buscar Novelas e Doramas Dublados Grátis'}
+        description="Pesquise por títulos de doramas, novelas asiáticas, atores e gêneros. Catálogo completo dublado em português para assistir grátis."
       />
 
       <div className="cinematic-container">
-        <Breadcrumbs items={[{ name: 'Busca', url: '/buscar' }]} />
+        <Breadcrumbs items={[{ name: 'Busca Grátis', url: '/buscar' }]} />
 
         {/* Barra de Busca Principal */}
-        <div style={{ maxWidth: '720px', margin: '0 auto var(--space-40)', textAlign: 'center', width: '100%', boxSizing: 'border-box' }}>
+        <div style={{ maxWidth: '720px', margin: '0 auto var(--space-32)', textAlign: 'center', width: '100%', boxSizing: 'border-box' }}>
           <h1 style={{ marginBottom: 'var(--space-16)', fontSize: 'clamp(1.5rem, 5vw, 2.4rem)' }}>
-            O que você quer assistir hoje?
+            Qual novela ou dorama você quer assistir grátis?
           </h1>
           <p style={{ marginBottom: 'var(--space-24)', color: 'var(--text-secondary)', fontSize: 'clamp(0.88rem, 2.5vw, 1rem)' }}>
-            Busque entre centenas de mini-dramas, séries e produções completas.
+            Busque entre centenas de novelas, mini-dramas e séries completas dubladas.
           </p>
 
           <div style={{ position: 'relative', width: '100%', boxSizing: 'border-box' }}>
@@ -99,7 +98,7 @@ export default function SearchPage() {
                 width: '100%',
                 boxSizing: 'border-box'
               }}
-              placeholder="Busque por títulos, atores, gêneros..."
+              placeholder="Busque por títulos, atores, gêneros (Ex: CEO, Romance, Vingança)..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               autoFocus
@@ -122,6 +121,13 @@ export default function SearchPage() {
           </div>
         </div>
 
+        {/* Anúncio AdSense Topo da Busca */}
+        <AdBanner 
+          slot="9000000001" 
+          style={{ margin: '20px auto 32px' }} 
+          label="PUBLICIDADE" 
+        />
+
         {/* Resultados */}
         {loading ? (
           <div className="media-grid-responsive">
@@ -132,7 +138,7 @@ export default function SearchPage() {
         ) : results.length > 0 ? (
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-24)' }}>
-              <h2>{results.length} Títulos Encontrados</h2>
+              <h2>{results.length} Títulos Disponíveis Grátis</h2>
             </div>
 
             <div className="media-grid-responsive">
@@ -140,6 +146,13 @@ export default function SearchPage() {
                 <MediaCard key={drama.book_id || drama.id} rawMedia={drama} />
               ))}
             </div>
+
+            {/* Anúncio AdSense Rodapé da Busca */}
+            <AdBanner 
+              slot="9000000002" 
+              style={{ margin: '36px auto 20px' }} 
+              label="PUBLICIDADE" 
+            />
           </div>
         ) : searchTerm.trim() ? (
           <div style={{ textAlign: 'center', padding: '60px 20px', maxWidth: '480px', margin: '0 auto' }}>

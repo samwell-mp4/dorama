@@ -7,16 +7,16 @@ import {
   ChevronDown, 
   ChevronUp, 
   Play, 
-  MessageCircle, 
-  Crown, 
+  Tv, 
   List, 
-  ArrowLeft,
-  ArrowRight,
-  Sparkles
+  ArrowLeft, 
+  ArrowRight, 
+  Sparkles 
 } from 'lucide-react';
 import { getPostBySlug, getRelatedPosts } from '../data/blogData';
 import SEOHead, { buildBreadcrumbSchema } from '../components/seo/SEOHead';
 import Breadcrumbs from '../components/common/Breadcrumbs';
+import AdBanner from '../components/common/AdBanner';
 import '../styles/blog.css';
 
 export default function BlogPostPage() {
@@ -184,6 +184,13 @@ export default function BlogPostPage() {
             </div>
           </header>
 
+          {/* Anúncio AdSense Topo do Artigo */}
+          <AdBanner 
+            slot="8000000001" 
+            style={{ margin: '20px auto 30px' }} 
+            label="PUBLICIDADE" 
+          />
+
           {/* Layout Principal com Índice e Conteúdo */}
           <div className="article-layout">
             {/* Índice Lateral Navegável */}
@@ -277,29 +284,38 @@ export default function BlogPostPage() {
                 </section>
               )}
 
-              {/* Banner de Conversão VIP */}
-              <div className="article-vip-cta">
-                <Crown size={36} style={{ color: 'var(--accent-coral)', marginBottom: '12px' }} />
-                <h3>Gostou das Recomendações? Assista Agora!</h3>
+              {/* Anúncio AdSense no meio do Artigo */}
+              <AdBanner 
+                slot="8000000002" 
+                style={{ margin: '30px auto' }} 
+                label="PUBLICIDADE" 
+              />
+
+              {/* Banner de Conversão 100% Grátis */}
+              <div className="article-vip-cta" style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(14, 165, 233, 0.08))', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
+                <Sparkles size={36} style={{ color: '#10B981', marginBottom: '12px' }} />
+                <h3>Gostou das Recomendações? Assista 100% Grátis!</h3>
                 <p>
-                  Desbloqueie todos os episódios dublados em alta definição por apenas R$ 5,00 no WhatsApp oficial. Acesso instantâneo e garantido!
+                  Todos os doramas e mini-dramas citados neste artigo estão liberados com dublagem em português e episódios completos sem custos e sem mensalidade.
                 </p>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', flexWrap: 'wrap' }}>
-                  <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-primary"
-                  >
-                    <MessageCircle size={18} /> Chamar no WhatsApp (31) 98886-8362
-                  </a>
-                  <Link to="/series" className="btn btn-secondary">
-                    Ver Catálogo Completo
+                  <Link to="/series" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #10B981, #059669)', gap: '8px' }}>
+                    <Tv size={18} /> Explorar Catálogo Grátis
+                  </Link>
+                  <Link to="/top-10" className="btn btn-secondary">
+                    Ver Ranking Top 10
                   </Link>
                 </div>
               </div>
             </main>
           </div>
+
+          {/* Anúncio AdSense Antes dos Artigos Relacionados */}
+          <AdBanner 
+            slot="8000000003" 
+            style={{ margin: '40px auto 20px' }} 
+            label="PUBLICIDADE" 
+          />
 
           {/* Artigos Relacionados */}
           {relatedPosts.length > 0 && (

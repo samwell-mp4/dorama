@@ -60,9 +60,9 @@ export default function LoginPage() {
             <PlayCircle size={32} style={{ color: 'var(--accent-coral)' }} />
             <span>DORAMAS <span style={{ color: 'var(--accent-coral)' }}>DUBLADOS</span></span>
           </div>
-          <h1 style={{ fontSize: '1.4rem', fontWeight: 700, marginTop: '8px' }}>Área do Assinante</h1>
+          <h1 style={{ fontSize: '1.4rem', fontWeight: 700, marginTop: '8px' }}>Acesso à Conta</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '4px' }}>
-            Digite seus dados para liberar a reprodução de todas as séries.
+            Acesse para gerenciar suas preferências e lista pessoal.
           </p>
         </div>
 
@@ -106,25 +106,23 @@ export default function LoginPage() {
         <div style={{ margin: 'var(--space-24) 0', position: 'relative', textAlign: 'center' }}>
           <div style={{ height: '1px', background: 'var(--glass-border)' }} />
           <span style={{ position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)', background: 'var(--bg-surface-elevated)', padding: '0 12px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            OU
+            100% GRÁTIS
           </span>
         </div>
 
         <div style={{ textAlign: 'center' }}>
           <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: 'var(--space-12)' }}>
-            Ainda não tem a sua licença VIP de R$ 5,00?
+            O catálogo completo está liberado gratuitamente para todos!
           </p>
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-whatsapp-buy"
-            style={{ fontSize: '0.95rem' }}
+          <Link
+            to="/series"
+            className="btn btn-primary"
+            style={{ background: 'linear-gradient(135deg, #10B981, #059669)', width: '100%', justifyContent: 'center' }}
           >
-            <MessageCircle size={20} fill="currentColor" /> Adquirir Licença no WhatsApp
-          </a>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '10px' }}>
-            Suporte e Liberação Rápida: <strong>(31) 98886-8362</strong>
+            Assistir Doramas Agora
+          </Link>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '12px' }}>
+            Dúvidas ou suporte? WhatsApp: <strong>(31) 98886-8362</strong>
           </p>
         </div>
       </div>

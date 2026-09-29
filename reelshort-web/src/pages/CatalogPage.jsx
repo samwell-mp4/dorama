@@ -5,6 +5,7 @@ import { filterAvailableContent } from '../data/dataLayer';
 import MediaCard from '../components/media/MediaCard';
 import SEOHead from '../components/seo/SEOHead';
 import Breadcrumbs from '../components/common/Breadcrumbs';
+import AdBanner from '../components/common/AdBanner';
 import { Tv, Film, Flame, Sparkles, Search, X, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
 import './catalog.css';
 
@@ -31,19 +32,19 @@ export default function CatalogPage({ categoryType = 'series' }) {
   const [sortBy, setSortBy] = useState('popular');
 
   // Determinar título da página
-  let pageTitle = 'Catálogo de Séries';
+  let pageTitle = 'Novelas e Doramas Dublados Grátis';
   let pageIcon = <Tv size={22} style={{ color: 'var(--accent-coral)' }} />;
 
   if (genre) {
-    pageTitle = `Gênero: ${genre.charAt(0).toUpperCase() + genre.slice(1)}`;
+    pageTitle = `Novelas e Doramas de ${genre.charAt(0).toUpperCase() + genre.slice(1)} Grátis`;
   } else if (location.pathname.includes('/filmes')) {
-    pageTitle = 'Filmes & Produções Especiais';
+    pageTitle = 'Filmes e Produções Especiais Grátis';
     pageIcon = <Film size={22} style={{ color: 'var(--accent-coral)' }} />;
   } else if (location.pathname.includes('/em-alta')) {
-    pageTitle = 'Em Alta no Brasil';
+    pageTitle = 'Novelas e Doramas Em Alta Grátis';
     pageIcon = <Flame size={22} style={{ color: 'var(--accent-coral)' }} />;
   } else if (location.pathname.includes('/lancamentos')) {
-    pageTitle = 'Novos Lançamentos';
+    pageTitle = 'Novos Lançamentos de Doramas Grátis';
     pageIcon = <Sparkles size={22} style={{ color: 'var(--accent-coral)' }} />;
   }
 
@@ -222,6 +223,13 @@ export default function CatalogPage({ categoryType = 'series' }) {
           ))}
         </div>
 
+        {/* Anúncio AdSense Superior no Catálogo */}
+        <AdBanner 
+          slot="4000000001" 
+          style={{ margin: '16px auto 20px' }} 
+          label="PUBLICIDADE" 
+        />
+
         {/* Barra Secundária: Ordenação, Duração & Contador */}
         <div className="catalog-toolbar-secondary">
           <div className="catalog-count-badge">
@@ -286,6 +294,13 @@ export default function CatalogPage({ categoryType = 'series' }) {
             </button>
           </div>
         )}
+
+        {/* Anúncio AdSense Inferior no Catálogo */}
+        <AdBanner 
+          slot="4000000002" 
+          style={{ margin: '36px auto 20px' }} 
+          label="PUBLICIDADE" 
+        />
       </div>
     </div>
   );

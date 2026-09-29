@@ -9,9 +9,11 @@ export default function SEOHead({
   ogType = 'website',
   schemaJson = null
 }) {
-  const siteName = 'Doramas Dublados';
-  const fullTitle = title ? `${title} | ${siteName}` : `${siteName} — Streaming de Doramas e Séries Dubladas`;
-  const defaultDesc = 'Assista aos melhores doramas dublados em português, mini-dramas e séries exclusivas com qualidade cinematográfica.';
+  const siteName = 'Doramas Dublados Grátis';
+  const fullTitle = title 
+    ? `${title} | ${siteName}` 
+    : `${siteName} — Novelas e Séries Asiáticas Online Sem Mensalidade`;
+  const defaultDesc = 'Assista a novelas e doramas dublados grátis em português! Mini-dramas chineses, coreanos e asiáticos com episódios completos sem pagar nada e sem mensalidade.';
   const metaDesc = description || defaultDesc;
   const currentCanonical = canonicalUrl || (typeof window !== 'undefined' ? window.location.href.split('?')[0] : 'https://doramasdublados.online');
   const defaultImage = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200&q=80';
@@ -22,7 +24,11 @@ export default function SEOHead({
       {/* Title e Metadados Básicos */}
       <title>{fullTitle}</title>
       <meta name="description" content={metaDesc} />
+      <meta name="keywords" content="doramas dublados gratis, novelas de doramas gratis, doramas gratis completo, assistir doramas gratis, mini dramas dublados, doramas online dublado, doramas coreanos gratis, doramas chineses gratis, doramas de ceo" />
       <link rel="canonical" href={currentCanonical} />
+
+      {/* Identificação Google AdSense */}
+      <meta name="google-adsense-account" content="ca-pub-1359270969670760" />
 
       {/* Open Graph */}
       <meta property="og:site_name" content={siteName} />

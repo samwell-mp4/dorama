@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from './api';
 import { filterAvailableContent, getContinueWatching } from './data/dataLayer';
 import HeroMovie from './components/home/HeroMovie';
 import MediaCarousel from './components/media/MediaCarousel';
 import { HeroSkeleton, CarouselSkeleton } from './components/media/MediaSkeleton';
 import SEOHead from './components/seo/SEOHead';
-import { Crown, Sparkles, Flame, Heart, TrendingUp, History } from 'lucide-react';
+import AdBanner from './components/common/AdBanner';
+import { Sparkles, Flame, Heart, TrendingUp, History, Tv, CheckCircle2 } from 'lucide-react';
 import './components/home/home.css';
 
 export default function Home() {
@@ -56,8 +58,8 @@ export default function Home() {
   return (
     <div className="home-view">
       <SEOHead 
-        title="Início — Filmes, Séries e Mini-dramas Exclusivos"
-        description="Assista aos melhores mini-dramas e séries com dublagem em português, catálogo completo e qualidade cinematográfica."
+        title="Novelas e Doramas Dublados Grátis — Catálogo Completo Online"
+        description="Assista a novelas e doramas dublados grátis em português! Mini-dramas de romance, CEO, vingança e fantasia com episódios completos sem assinatura."
       />
 
       {loading ? (
@@ -74,21 +76,46 @@ export default function Home() {
           {heroDrama && <HeroMovie rawMedia={heroDrama} />}
 
           <div className="cinematic-container">
-            {/* Faixa VIP R$ 4,99 */}
-            <section className="vip-offer-strip" aria-label="Oferta de Assinatura VIP">
+            {/* Faixa Informativa 100% Grátis */}
+            <section 
+              className="vip-offer-strip" 
+              aria-label="Novelas e Doramas 100% Grátis"
+              style={{
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(14, 165, 233, 0.1))',
+                borderColor: 'rgba(16, 185, 129, 0.35)'
+              }}
+            >
               <div className="vip-offer-strip-left">
-                <div className="vip-offer-strip-icon">
-                  <Crown size={28} />
+                <div 
+                  className="vip-offer-strip-icon"
+                  style={{ background: 'linear-gradient(135deg, #10B981, #059669)', color: '#fff' }}
+                >
+                  <Sparkles size={28} />
                 </div>
                 <div>
-                  <h3>Acesso VIP Ilimitado por apenas <span>R$ 4,99/mês</span></h3>
-                  <p>Desbloqueie todos os episódios em 4K, sem anúncios e com lançamentos antecipados.</p>
+                  <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    Novelas & Doramas Dublados <span style={{ color: '#10B981' }}>100% Grátis</span>
+                  </h3>
+                  <p>
+                    Aproveite centenas de episódios completos dublados em alta definição. Sem cobrança de assinatura, sem cartão e sem burocracia!
+                  </p>
                 </div>
               </div>
-              <button className="btn btn-primary" style={{ padding: '10px 28px' }}>
-                Garantir Desconto
-              </button>
+              <Link 
+                to="/series" 
+                className="btn btn-primary" 
+                style={{ padding: '10px 24px', background: 'linear-gradient(135deg, #10B981, #059669)', gap: '8px' }}
+              >
+                <Tv size={18} /> Ver Catálogo Grátis
+              </Link>
             </section>
+
+            {/* Anúncio AdSense Superior da Home */}
+            <AdBanner 
+              slot="3000000001" 
+              style={{ margin: '20px auto 30px' }} 
+              label="PUBLICIDADE" 
+            />
 
             {/* Continuar Assistindo (Se houver progresso salvo) */}
             {continueWatching.length > 0 && (
@@ -100,15 +127,31 @@ export default function Home() {
               />
             )}
 
-            {/* Carrosséis por categoria vindos da API */}
+            {/* Carrosséis por categoria */}
             {bookshelves.map((shelf, idx) => (
-              <MediaCarousel
-                key={shelf.bookshelf_name || idx}
-                title={shelf.bookshelf_name}
-                icon={getShelfIcon(shelf.bookshelf_name)}
-                items={shelf.books}
-              />
+              <React.Fragment key={shelf.bookshelf_name || idx}>
+                <MediaCarousel
+                  title={shelf.bookshelf_name}
+                  icon={getShelfIcon(shelf.bookshelf_name)}
+                  items={shelf.books}
+                />
+                {/* Inserir anúncio responsivo a cada 2 carrosséis */}
+                {idx === 1 && (
+                  <AdBanner 
+                    slot="3000000002" 
+                    style={{ margin: '24px auto' }} 
+                    label="PUBLICIDADE" 
+                  />
+                )}
+              </React.Fragment>
             ))}
+
+            {/* Anúncio AdSense Rodapé da Home */}
+            <AdBanner 
+              slot="3000000003" 
+              style={{ margin: '30px auto' }} 
+              label="PUBLICIDADE" 
+            />
           </div>
         </>
       )}

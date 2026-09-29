@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
-import { Play, SkipForward, SkipBack, ArrowLeft, AlertCircle, Crown, Lock, MessageCircle, LogIn } from 'lucide-react';
+import { Play, SkipForward, SkipBack, ArrowLeft, AlertCircle, Sparkles, CheckCircle2 } from 'lucide-react';
 import { api } from './api';
 import { parseSlug, saveContinueWatching } from './data/dataLayer';
-import { authService } from './data/authService';
 import SEOHead, { buildEpisodeSchema, buildBreadcrumbSchema } from './components/seo/SEOHead';
 import Breadcrumbs from './components/common/Breadcrumbs';
-import VIPPaywallModal from './components/auth/VIPPaywallModal';
+import AdBanner from './components/common/AdBanner';
 import './pages/player.css';
 
 export default function Player() {
@@ -31,25 +30,7 @@ export default function Player() {
   const [countdown, setCountdown] = useState(null);
   const [unavailableSeries, setUnavailableSeries] = useState(false);
 
-  // Controle de Acesso VIP (Episódio 1 é PRÉVIA GRÁTIS liberada para todos)
-  const isPreviewEp = currentEpisodeNum === 1;
-  const initialIsVIP = authService.isAuthenticated() && authService.isVIP();
-  const [isVIPUser, setIsVIPUser] = useState(initialIsVIP);
-  const [isPaywallModalOpen, setIsPaywallModalOpen] = useState(!initialIsVIP && !isPreviewEp);
-
   const videoRef = useRef(null);
-
-  useEffect(() => {
-    const handleAuth = () => {
-      const isAuthVIP = authService.isAuthenticated() && authService.isVIP();
-      setIsVIPUser(isAuthVIP);
-      if (isAuthVIP || currentEpisodeNum === 1) {
-        setIsPaywallModalOpen(false);
-      }
-    };
-    window.addEventListener('authChange', handleAuth);
-    return () => window.removeEventListener('authChange', handleAuth);
-  }, [currentEpisodeNum]);
 
   // 1. Obter lista de episódios para resolver chapter_id e verificar disponibilidade
   useEffect(() => {
@@ -82,7 +63,7 @@ export default function Player() {
           if (found) {
             setCurrentChapterId(found.chapter_id);
           } else {
-            // Se o episódio solicitado não existir (ex: foi além do limite), ir para o primeiro episódio
+            // Se o episódio solicitado não existir, ir para o primeiro episódio
             const fallbackEp = eps[0];
             const fallbackNum = Number(fallbackEp.episode || fallbackEp.serial_number || 1);
             navigate(`/series/${slug}/temporada-1/episodio-${fallbackNum}`, { replace: true });
@@ -103,7 +84,7 @@ export default function Player() {
     return () => { isMounted = false; };
   }, [bookId, filteredTitle, currentEpisodeNum, slug]);
 
-  // 2. Buscar URL do vídeo (apenas se for VIP)
+  // 2. Buscar URL do vídeo - 100% GRÁTIS PARA TODOS OS EPISÓDIOS!
   useEffect(() => {
     let isMounted = true;
     const fetchVideoUrl = async () => {
@@ -122,17 +103,14 @@ export default function Player() {
       }
     };
 
-    if (currentChapterId && !unavailableSeries && (isVIPUser || currentEpisodeNum === 1)) {
+    if (currentChapterId && !unavailableSeries) {
       fetchVideoUrl();
     } else {
       setLoading(false);
-      if (!isVIPUser && currentEpisodeNum > 1) {
-        setIsPaywallModalOpen(true);
-      }
     }
-  }, [bookId, currentEpisodeNum, filteredTitle, currentChapterId, unavailableSeries, isVIPUser]);
+  }, [bookId, currentEpisodeNum, filteredTitle, currentChapterId, unavailableSeries]);
 
-  // 2.1. Suporte universal a streaming HLS (.m3u8) para todos os navegadores (Desktop & Mobile)
+  // 2.1. Suporte universal a streaming HLS (.m3u8) para todos os navegadores
   useEffect(() => {
     if (!videoRef.current || !videoData?.video_url) return;
     const video = videoRef.current;
@@ -164,7 +142,7 @@ export default function Player() {
 
   // 3. Salvar progresso
   const handleTimeUpdate = () => {
-    if (videoRef.current && isVIPUser) {
+    if (videoRef.current) {
       const current = videoRef.current.currentTime;
       const total = videoRef.current.duration || 1;
       const percentage = (current / total) * 100;
@@ -185,12 +163,11 @@ export default function Player() {
     }
   };
 
-  // 4. Contagem regressiva para próximo episódio ou abrir oferta VIP se finalizou a prévia grátis do Ep. 1
+  // 4. Contagem regressiva automática para o próximo episódio
+  const hasNext = episodesList.some(ep => Number(ep.episode || ep.serial_number) === currentEpisodeNum + 1);
+  const hasPrev = episodesList.some(ep => Number(ep.episode || ep.serial_number) === currentEpisodeNum - 1);
+
   const handleVideoEnded = () => {
-    if (!isVIPUser && currentEpisodeNum === 1) {
-      setIsPaywallModalOpen(true);
-      return;
-    }
     if (hasNext) {
       setCountdown(5);
     }
@@ -206,14 +183,7 @@ export default function Player() {
     }
   }, [countdown]);
 
-  const hasNext = episodesList.some(ep => Number(ep.episode || ep.serial_number) === currentEpisodeNum + 1);
-  const hasPrev = episodesList.some(ep => Number(ep.episode || ep.serial_number) === currentEpisodeNum - 1);
-
   const goToNextEpisode = () => {
-    if (!isVIPUser) {
-      setIsPaywallModalOpen(true);
-      return;
-    }
     setCountdown(null);
     const nextEp = episodesList.find(ep => Number(ep.episode || ep.serial_number) === currentEpisodeNum + 1);
     if (nextEp) {
@@ -223,10 +193,6 @@ export default function Player() {
   };
 
   const goToPrevEpisode = () => {
-    if (!isVIPUser) {
-      setIsPaywallModalOpen(true);
-      return;
-    }
     const prevEp = episodesList.find(ep => Number(ep.episode || ep.serial_number) === currentEpisodeNum - 1);
     if (prevEp) {
       const num = prevEp.episode || prevEp.serial_number;
@@ -260,7 +226,8 @@ export default function Player() {
   }
 
   const breadcrumbs = [
-    { name: 'Séries', url: '/series' },
+    { name: 'Início', url: '/' },
+    { name: 'Séries & Novelas', url: '/series' },
     { name: parsed.title || 'Detalhes', url: `/series/${slug}` },
     { name: `Episódio ${currentEpisodeNum}`, url: '#' }
   ];
@@ -269,13 +236,11 @@ export default function Player() {
   const episodeSchema = buildEpisodeSchema({ title: parsed.title, poster: '' }, currentEpisodeNum, currentUrl);
   const breadcrumbSchema = buildBreadcrumbSchema(breadcrumbs);
 
-  const whatsappUrl = 'https://wa.me/5531988868362?text=' + encodeURIComponent('Olá! Quero comprar minha licença VIP do Doramas Dublados por R$ 5,00 para liberar o acesso.');
-
   return (
     <div className="player-view">
       <SEOHead
-        title={`${parsed.title} — Episódio ${currentEpisodeNum} | Reprodução HD`}
-        description={`Assista ao Episódio ${currentEpisodeNum} de ${parsed.title} online no Doramas Dublados.`}
+        title={`${parsed.title} — Episódio ${currentEpisodeNum} Completo Dublado Grátis`}
+        description={`Assista ao Episódio ${currentEpisodeNum} de ${parsed.title} online grátis dublado em português! Novela e dorama completo em HD sem mensalidade.`}
         canonicalUrl={currentUrl}
         ogType="video.episode"
         schemaJson={{
@@ -287,40 +252,16 @@ export default function Player() {
       <div className="cinematic-container" style={{ paddingTop: 'var(--space-20)' }}>
         <Breadcrumbs items={breadcrumbs} />
 
+        {/* Anúncio AdSense Superior no Player */}
+        <AdBanner 
+          slot="1000000001" 
+          style={{ marginBottom: '16px' }} 
+          label="PUBLICIDADE • APOIE O SITE GRÁTIS" 
+        />
+
         <div className="player-theater">
           <div className="video-element-wrapper">
-            {/* Paywall Overlay para Não Logados / Não VIP apenas se NÃO for o 1º episódio grátis */}
-            {!isVIPUser && currentEpisodeNum !== 1 ? (
-              <div className="vip-theater-lock-overlay">
-                <div className="vip-theater-lock-icon">
-                  <Lock size={28} />
-                </div>
-                <h2 className="vip-theater-lock-title">
-                  Conteúdo Exclusivo VIP
-                </h2>
-                <p className="vip-theater-lock-desc">
-                  Para assistir a todos os episódios em Full HD e dublados, adquira sua licença oficial por apenas <strong>R$ 5,00</strong>.
-                </p>
-
-                <div className="vip-theater-lock-actions">
-                  <a 
-                    href={whatsappUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="btn btn-primary"
-                    style={{ background: 'linear-gradient(135deg, #25D366, #128C7E)', gap: '8px' }}
-                  >
-                    <MessageCircle size={18} fill="currentColor" /> Comprar no WhatsApp (31) 98886-8362
-                  </a>
-                  <button 
-                    className="btn btn-secondary" 
-                    onClick={() => setIsPaywallModalOpen(true)}
-                  >
-                    <LogIn size={18} /> Já Tenho Conta / Entrar
-                  </button>
-                </div>
-              </div>
-            ) : loading ? (
+            {loading ? (
               <div className="skeleton" style={{ width: '100%', height: '100%' }} />
             ) : videoData?.video_url ? (
               <video
@@ -336,9 +277,9 @@ export default function Player() {
             ) : (
               <div style={{ textAlign: 'center', padding: '40px', color: '#fff' }}>
                 <AlertCircle size={44} style={{ color: 'var(--accent-coral)', marginBottom: '12px' }} />
-                <h3>Vídeo não disponível ou em processamento</h3>
+                <h3>Vídeo em carregamento ou temporariamente indisponível</h3>
                 <p style={{ marginTop: '8px', color: 'var(--text-muted)' }}>
-                  Não foi possível reproduzir este episódio no momento.
+                  Aguarde alguns instantes ou selecione outro episódio abaixo.
                 </p>
                 <button 
                   className="btn btn-secondary" 
@@ -369,38 +310,30 @@ export default function Player() {
             )}
           </div>
 
-          {/* Banner Informativo de Prévia Grátis para Usuários Não-VIP no Ep. 1 */}
-          {!isVIPUser && currentEpisodeNum === 1 && (
-            <div className="player-preview-banner">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span className="badge" style={{ background: '#10B981', color: '#fff', fontSize: '0.72rem', fontWeight: 800 }}>
-                  PRÉVIA GRÁTIS
-                </span>
-                <span style={{ fontSize: '0.86rem', color: '#fff' }}>
-                  Você está assistindo ao <strong>1º episódio grátis</strong>!
-                </span>
-              </div>
-              <button 
-                onClick={() => setIsPaywallModalOpen(true)}
-                className="btn btn-primary"
-                style={{ padding: '6px 14px', fontSize: '0.82rem', gap: '6px', minHeight: '34px' }}
-              >
-                <Crown size={15} /> Desbloquear Série Completa R$ 5
-              </button>
+          {/* Faixa Informativa 100% Grátis */}
+          <div className="player-preview-banner" style={{ background: 'linear-gradient(90deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05))', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span className="badge" style={{ background: '#10B981', color: '#fff', fontSize: '0.72rem', fontWeight: 800 }}>
+                100% GRÁTIS
+              </span>
+              <span style={{ fontSize: '0.86rem', color: '#fff' }}>
+                Você está assistindo ao <strong>Episódio {currentEpisodeNum} completo e dublado</strong>! Todos os episódios são liberados grátis.
+              </span>
             </div>
-          )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#10B981', fontSize: '0.82rem', fontWeight: 700 }}>
+              <Sparkles size={16} /> Sem Mensalidade
+            </div>
+          </div>
 
           <div className="player-bottom-bar">
             <div className="player-episode-info">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <h2>{parsed.title.toUpperCase()} — Episódio {currentEpisodeNum}</h2>
-                {currentEpisodeNum === 1 && (
-                  <span className="badge" style={{ background: '#10B981', color: '#fff', fontSize: '0.68rem', fontWeight: 800 }}>
-                    PRÉVIA GRÁTIS
-                  </span>
-                )}
+                <span className="badge" style={{ background: '#10B981', color: '#fff', fontSize: '0.68rem', fontWeight: 800 }}>
+                  DUBLADO EM HD
+                </span>
               </div>
-              <p>Temporada 1 • Áudio Original com Dublagem PT-BR</p>
+              <p>Temporada 1 • Áudio com Dublagem em Português • Completo e Grátis</p>
             </div>
 
             <div className="player-nav-actions">
@@ -429,54 +362,59 @@ export default function Player() {
           </div>
         </div>
 
-        {/* Grade de Troca Rápida de Episódios */}
+        {/* Anúncio AdSense Central no Player */}
+        <AdBanner 
+          slot="1000000002" 
+          style={{ margin: '24px auto' }} 
+          label="PUBLICIDADE" 
+        />
+
+        {/* Grade de Troca Rápida de Episódios - 100% Liberada para Todos */}
         {episodesList.length > 0 && (
           <div className="player-episodes-drawer">
-            <h3 style={{ marginBottom: 'var(--space-16)' }}>Todos os Episódios ({episodesList.length})</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-16)', flexWrap: 'wrap', gap: '8px' }}>
+              <h3 style={{ margin: 0 }}>Todos os Episódios Disponíveis ({episodesList.length})</h3>
+              <span style={{ fontSize: '0.82rem', color: '#10B981', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
+                <CheckCircle2 size={15} /> Todos os {episodesList.length} episódios liberados grátis
+              </span>
+            </div>
+            
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '8px' }}>
               {episodesList.map((ep, idx) => {
                 const epNum = Number(ep.episode || ep.serial_number || idx + 1);
                 const isCurrent = epNum === currentEpisodeNum;
-                const isFreePreview = epNum === 1;
                 return (
                   <button
                     key={ep.chapter_id || idx}
-                    onClick={() => {
-                      if (!isVIPUser && epNum > 1) {
-                        setIsPaywallModalOpen(true);
-                      } else {
-                        navigate(`/series/${slug}/temporada-1/episodio-${epNum}`);
-                      }
-                    }}
+                    onClick={() => navigate(`/series/${slug}/temporada-1/episodio-${epNum}`)}
                     className="btn"
+                    title={`Assistir Episódio ${epNum} Grátis`}
                     style={{
                       padding: '10px 0',
-                      background: isCurrent ? 'var(--accent-coral)' : (isFreePreview ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255,255,255,0.06)'),
-                      color: isFreePreview && !isCurrent ? '#10B981' : '#fff',
+                      background: isCurrent ? 'var(--accent-coral)' : 'rgba(255,255,255,0.06)',
+                      color: isCurrent ? '#fff' : 'var(--text-secondary)',
                       fontWeight: 700,
                       borderRadius: 'var(--radius-sm)',
-                      border: isFreePreview && !isCurrent ? '1px solid rgba(16, 185, 129, 0.35)' : 'none',
-                      boxShadow: isCurrent ? '0 0 12px var(--accent-glow)' : 'none'
+                      border: isCurrent ? '1px solid var(--accent-coral)' : '1px solid rgba(255,255,255,0.08)',
+                      boxShadow: isCurrent ? '0 0 12px var(--accent-glow)' : 'none',
+                      transition: 'all 0.2s ease'
                     }}
                   >
-                    Ep. {epNum} {isFreePreview && '✨'}
+                    Ep. {epNum}
                   </button>
                 );
               })}
             </div>
           </div>
         )}
-      </div>
 
-      {/* Modal VIP acionado quando o usuário tenta assistir */}
-      <VIPPaywallModal
-        isOpen={isPaywallModalOpen}
-        onClose={() => setIsPaywallModalOpen(false)}
-        onSuccess={() => {
-          setIsVIPUser(true);
-          setIsPaywallModalOpen(false);
-        }}
-      />
+        {/* Anúncio AdSense Inferior no Player */}
+        <AdBanner 
+          slot="1000000003" 
+          style={{ marginTop: '28px' }} 
+          label="PUBLICIDADE" 
+        />
+      </div>
     </div>
   );
 }

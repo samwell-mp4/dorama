@@ -2,12 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Search, Sparkles, PlayCircle, LogIn, LogOut, ShieldCheck, User, X } from 'lucide-react';
 import { authService } from '../../data/authService';
-import VIPPaywallModal from '../auth/VIPPaywallModal';
 
 export default function TopHeader() {
   const [query, setQuery] = useState('');
   const [user, setUser] = useState(authService.getCurrentUser());
-  const [isPaywallOpen, setIsPaywallOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -48,13 +46,13 @@ export default function TopHeader() {
           </Link>
         </div>
 
-        {/* Busca Desktop (oculta em mobile < 768px para evitar overflow) */}
+        {/* Busca Desktop */}
         <form className="global-search-form desktop-search-form" onSubmit={handleSearchSubmit}>
           <Search size={18} className="global-search-icon" />
           <input
             type="text"
             className="global-search-input"
-            placeholder="Pesquise filmes, séries, atores..."
+            placeholder="Pesquise novelas, doramas, atores..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             aria-label="Campo de busca global"
@@ -72,24 +70,25 @@ export default function TopHeader() {
             {isMobileSearchOpen ? <X size={20} /> : <Search size={20} />}
           </button>
 
-          {/* Badge VIP Desktop */}
-          <button 
-            className="vip-badge-header badge badge-vip"
-            onClick={() => setIsPaywallOpen(true)}
-            style={{ cursor: 'pointer' }}
+          {/* Badge 100% Grátis Desktop */}
+          <Link 
+            to="/series" 
+            className="badge" 
+            style={{ 
+              background: 'linear-gradient(135deg, #10B981, #059669)', 
+              color: '#fff', 
+              fontWeight: 800, 
+              padding: '6px 14px', 
+              borderRadius: 'var(--radius-pill)', 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '6px', 
+              textDecoration: 'none',
+              boxShadow: '0 0 12px rgba(16, 185, 129, 0.3)'
+            }}
           >
-            <Sparkles size={14} /> VIP R$ 5,00
-          </button>
-
-          {/* Badge VIP Mobile Compacto */}
-          <button 
-            className="vip-badge-mobile"
-            onClick={() => setIsPaywallOpen(true)}
-            aria-label="Assinar VIP R$ 5,00"
-          >
-            <Sparkles size={13} />
-            <span>VIP R$ 5</span>
-          </button>
+            <Sparkles size={14} /> 100% Grátis
+          </Link>
 
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -104,7 +103,6 @@ export default function TopHeader() {
                     {user.name.charAt(0).toUpperCase()}
                   </div>
                   <span className="hide-on-mobile" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{user.name.split(' ')[0]}</span>
-                  <span className="badge badge-vip" style={{ fontSize: '0.68rem', padding: '1px 6px' }}>VIP</span>
                 </div>
               )}
 
@@ -130,14 +128,14 @@ export default function TopHeader() {
         </div>
       </header>
 
-      {/* Gaveta de Busca Mobile (100% de largura, sem qualquer scroll horizontal) */}
+      {/* Gaveta de Busca Mobile */}
       <div className={`mobile-search-drawer ${isMobileSearchOpen ? 'open' : ''}`}>
         <form className="mobile-search-form" onSubmit={handleSearchSubmit}>
           <Search size={18} className="mobile-search-icon" />
           <input
             type="text"
             className="mobile-search-input"
-            placeholder="Buscar séries, doramas, atores..."
+            placeholder="Buscar novelas, doramas, atores..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             aria-label="Campo de busca mobile"
@@ -155,13 +153,6 @@ export default function TopHeader() {
           )}
         </form>
       </div>
-
-      {/* Modal de Pagamento VIP com WhatsApp 31988868362 */}
-      <VIPPaywallModal
-        isOpen={isPaywallOpen}
-        onClose={() => setIsPaywallOpen(false)}
-        onSuccess={() => setIsPaywallOpen(false)}
-      />
     </>
   );
 }

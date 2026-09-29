@@ -15,7 +15,10 @@ import BlogPage from './pages/BlogPage';
 import BlogPostPage from './pages/BlogPostPage';
 import Top10Page from './pages/Top10Page';
 import HowToWatchPage from './pages/HowToWatchPage';
+import SeoHubPage from './pages/SeoHubPage';
+import SitemapHtmlPage from './pages/SitemapHtmlPage';
 import ScrollToTop from './components/common/ScrollToTop';
+import { ALL_SEO_SLUGS } from './data/seoPagesData';
 
 export default function App() {
   return (
@@ -26,6 +29,20 @@ export default function App() {
           <Route element={<AppLayout />}>
             {/* Home Principal */}
             <Route path="/" element={<Home />} />
+
+            {/* Todas as Páginas de SEO Programático (Semrush Keyword Magic: 2M+ Volume) */}
+            {ALL_SEO_SLUGS.map(slug => (
+              <Route key={slug} path={`/${slug}`} element={<SeoHubPage hubKey={slug} />} />
+            ))}
+
+            {/* Aliases e Rotas Complementares de SEO */}
+            <Route path="/doramas-novos" element={<SeoHubPage hubKey="dorama-novo" />} />
+            <Route path="/aplicativo-para-assistir-dorama-de-graca" element={<SeoHubPage hubKey="app-para-assistir-doramas-gratis" />} />
+            <Route path="/hub/:hubKey" element={<SeoHubPage />} />
+
+            {/* Mapa do Site HTML para Indexação Rápida pelo Googlebot */}
+            <Route path="/mapa-do-site" element={<SitemapHtmlPage />} />
+            <Route path="/sitemap-html" element={<SitemapHtmlPage />} />
 
             {/* Rotas de Catálogo & Categorias */}
             <Route path="/filmes" element={<CatalogPage categoryType="movie" />} />

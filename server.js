@@ -62,13 +62,18 @@ app.use((req, res, next) => {
   next();
 });
 
+// Servir ads.txt diretamente para validação imediata do Google AdSense
+app.get('/ads.txt', (req, res) => {
+  res.type('text/plain').send('google.com, pub-1359270969670760, DIRECT, f08c47fec0942fa0\n');
+});
+
 // Servir arquivos estáticos da aplicação compilada (Vite / React)
 const candidateDistDirs = [
-  path.resolve(__dirname, 'dist'),
   path.resolve(__dirname, 'reelshort-web', 'dist'),
+  path.resolve(__dirname, 'dist'),
   path.resolve(__dirname, 'reelshort-api', 'dist'),
-  '/app/dist',
-  '/app/reelshort-web/dist'
+  '/app/reelshort-web/dist',
+  '/app/dist'
 ];
 const distPath = candidateDistDirs.find(d => fs.existsSync(path.resolve(d, 'index.html'))) || candidateDistDirs[0];
 console.log(`[Dorama Server] Frontend estático carregado de: ${distPath} (index.html: ${fs.existsSync(path.resolve(distPath, 'index.html'))})`);

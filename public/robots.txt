@@ -1,3 +1,38 @@
-# https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+Allow: /filmes
+Allow: /series/
+Allow: /generos/
+Allow: /em-alta
+Allow: /lancamentos
+Allow: /blog/
+Allow: /top-10
+Allow: /como-assistir
+Allow: /assistir-doramas-gratis
+Allow: /doramas-online-dublado
+Allow: /doramas-mais-assistidos
+Allow: /dorama-novo
+Allow: /doramas-novos
+Allow: /doramas-love
+Allow: /app-para-assistir-doramas-gratis
+Allow: /doramas-coreanos
+Allow: /doramas-netflix
+Allow: /meu-dorama
+
+# Google AdSense Crawlers
+User-agent: Mediapartners-Google
+Allow: /
+
+User-agent: AdsBot-Google
+Allow: /
+
+# Bloquear páginas dinâmicas ou privadas sem valor de busca
+Disallow: /buscar?*
+Disallow: /minha-lista
+Disallow: /historico
+Disallow: /configuracoes
+
+Sitemap: https://doramasdublados.online/sitemap.xml
+Sitemap: https://doramasdublados.online/sitemaps/hubs.xml
+Sitemap: https://doramasdublados.online/sitemaps/series.xml
+Sitemap: https://doramasdublados.online/sitemaps/blog.xml

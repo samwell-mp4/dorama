@@ -6,7 +6,7 @@ export default function WhatsAppWidget() {
   const [showBubble, setShowBubble] = useState(true);
 
   const phoneNumber = '5531988868362';
-  const message = encodeURIComponent('Olá! Gostaria de tirar dúvidas / adquirir a licença VIP do Doramas Dublados por R$ 5,00.');
+  const message = encodeURIComponent('Olá! Acessei o site Doramas Dublados Grátis e gostaria de tirar uma dúvida ou enviar uma sugestão.');
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
 
   return (
@@ -21,8 +21,8 @@ export default function WhatsAppWidget() {
             <X size={14} />
           </button>
           <div className="whatsapp-bubble-text">
-            <strong>Atendimento WhatsApp</strong>
-            Liberar Acesso VIP por R$ 5,00 ou tirar dúvidas? Fale conosco!
+            <strong>Atendimento & Dúvidas</strong>
+            Tem alguma dúvida ou sugestão de novelas e doramas? Fale conosco!
           </div>
         </div>
       )}

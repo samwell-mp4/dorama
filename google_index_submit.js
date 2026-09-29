@@ -5,13 +5,6 @@ const crypto = require('crypto');
 // Caminho da chave do Google Service Account
 const KEY_FILE = path.join(__dirname, 'google-indexing-key.json');
 
-if (!fs.existsSync(KEY_FILE)) {
-  console.error('Arquivo de credenciais não encontrado:', KEY_FILE);
-  process.exit(1);
-}
-
-const keyData = JSON.parse(fs.readFileSync(KEY_FILE, 'utf8'));
-
 // Função para gerar JWT assinado com RSA-SHA256
 function generateJWT(clientEmail, privateKey) {
   const header = {
@@ -40,7 +33,7 @@ function generateJWT(clientEmail, privateKey) {
 }
 
 // Obter Access Token da API do Google
-async function getAccessToken() {
+async function getAccessToken(keyData) {
   const jwt = generateJWT(keyData.client_email, keyData.private_key);
 
   const res = await fetch('https://oauth2.googleapis.com/token', {
@@ -82,6 +75,26 @@ async function publishUrl(accessToken, url, type = 'URL_UPDATED') {
   return { status: res.status, ok: res.ok, data: result };
 }
 
+// Ping nos motores de busca para re-rastrear sitemaps
+async function pingSearchEngines() {
+  const sitemapUrl = encodeURIComponent('https://doramasdublados.online/sitemap.xml');
+  console.log('\n📡 Notificando motores de busca via Ping XML Sitemaps...');
+
+  const endpoints = [
+    { name: 'Google Sitemap Ping', url: `https://www.google.com/ping?sitemap=${sitemapUrl}` },
+    { name: 'Bing Sitemap Ping', url: `https://www.bing.com/ping?sitemap=${sitemapUrl}` }
+  ];
+
+  for (const ep of endpoints) {
+    try {
+      const res = await fetch(ep.url, { method: 'GET', headers: { 'User-Agent': 'DoramasDubladosBot/1.0' } });
+      console.log(`  • ${ep.name}: Status ${res.status} (${res.status === 200 ? 'OK Notificado' : 'Recebido'})`);
+    } catch (e) {
+      console.log(`  • ${ep.name}: Falha de rede ou timeout (${e.message})`);
+    }
+  }
+}
+
 // Extrair URLs de arquivos XML de sitemap
 function extractUrlsFromXml(filePath) {
   if (!fs.existsSync(filePath)) return [];
@@ -97,30 +110,52 @@ function extractUrlsFromXml(filePath) {
 
 async function main() {
   console.log('====================================================');
-  console.log('🚀 GOOGLE INDEXING API - SUBMISSÃO AUTOMÁTICA');
-  console.log(`Conta de Serviço: ${keyData.client_email}`);
+  console.log('🚀 GOOGLE INDEXING & SEO ACCELERATOR - SUBMISSÃO AUTOMÁTICA');
   console.log('====================================================\n');
 
-  console.log('1. Autenticando com Google OAuth 2.0...');
+  // 1. Extrair URLs de todos os sitemaps
+  console.log('1. Coletando URLs dos sitemaps XML...');
+  const sitemapHubs = path.join(__dirname, 'reelshort-web', 'public', 'sitemaps', 'hubs.xml');
+  const sitemapSeries = path.join(__dirname, 'reelshort-web', 'public', 'sitemaps', 'series.xml');
+  const sitemapBlog = path.join(__dirname, 'reelshort-web', 'public', 'sitemaps', 'blog.xml');
+
+  const urlsHubs = extractUrlsFromXml(sitemapHubs);
+  const urlsSeries = extractUrlsFromXml(sitemapSeries);
+  const urlsBlog = extractUrlsFromXml(sitemapBlog);
+
+  const allUrls = [...new Set([...urlsHubs, ...urlsSeries, ...urlsBlog])];
+  console.log(`✅ Encontradas ${allUrls.length} URLs únicas para indexação:`);
+  console.log(`  - Hubs e Landing Pages SEO: ${urlsHubs.length}`);
+  console.log(`  - Séries e Categorias: ${urlsSeries.length}`);
+  console.log(`  - Artigos do Blog: ${urlsBlog.length}\n`);
+
+  // 2. Notificar motores de busca via Ping
+  await pingSearchEngines();
+
+  // 3. Submeter via Google Indexing API se houver chave configurada
+  if (!fs.existsSync(KEY_FILE)) {
+    console.log('\nℹ️ AVISO SOBRE GOOGLE INDEXING API:');
+    console.log(`Para envio direto via API de Indexação Instantânea do Google:`);
+    console.log(`1. Crie uma Service Account no Google Cloud Console com o escopo "Indexing API".`);
+    console.log(`2. Baixe a chave JSON e salve como: ${KEY_FILE}`);
+    console.log(`3. Adicione o e-mail da service account como Proprietário no Google Search Console.`);
+    console.log(`4. Execute novamente: node google_index_submit.js`);
+    console.log('\nMesmo sem a API key, todos os sitemaps XML e páginas de SEO já estão gerados e acessíveis para o Googlebot no servidor!');
+    return;
+  }
+
+  const keyData = JSON.parse(fs.readFileSync(KEY_FILE, 'utf8'));
+  console.log(`\n2. Autenticando com Google OAuth 2.0 (${keyData.client_email})...`);
   let token;
   try {
-    token = await getAccessToken();
-    console.log('✅ Autenticado com sucesso! Token obtido.\n');
+    token = await getAccessToken(keyData);
+    console.log('✅ Autenticado com sucesso! Token OAuth obtido.\n');
   } catch (err) {
     console.error('❌ Erro na autenticação:', err.message);
     process.exit(1);
   }
 
-  console.log('2. Coletando URLs dos sitemaps XML...');
-  const sitemapSeries = path.join(__dirname, 'reelshort-web', 'public', 'sitemaps', 'series.xml');
-  const sitemapBlog = path.join(__dirname, 'reelshort-web', 'public', 'sitemaps', 'blog.xml');
-
-  const urlsSeries = extractUrlsFromXml(sitemapSeries);
-  const urlsBlog = extractUrlsFromXml(sitemapBlog);
-
-  const allUrls = [...new Set([...urlsSeries, ...urlsBlog])];
-  console.log(`Encontradas ${allUrls.length} URLs únicas para indexação:\n`);
-
+  console.log('3. Enviando URLs para o Google Indexing API...');
   let successCount = 0;
   let failCount = 0;
 
@@ -142,8 +177,8 @@ async function main() {
       failCount++;
     }
 
-    // Pequeno delay para respeitar rate limits da API
-    await new Promise(r => setTimeout(r, 250));
+    // Delay de 200ms para respeitar limites de requisições por minuto da API
+    await new Promise(r => setTimeout(r, 200));
   }
 
   console.log('\n====================================================');
